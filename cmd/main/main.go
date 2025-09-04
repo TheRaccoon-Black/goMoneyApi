@@ -37,6 +37,25 @@ func main() {
 	apiRoutes.Use(middleware.AuthMiddleware()) 
 	{
 		apiRoutes.GET("/profile", handler.GetCurrentUserProfile)
+
+		//account routes
+		apiRoutes.POST("/accounts", handler.CreateAccount)
+        apiRoutes.GET("/accounts", handler.GetAccounts)
+        apiRoutes.PUT("/accounts/:id", handler.UpdateAccount)
+        apiRoutes.DELETE("/accounts/:id", handler.DeleteAccount)
+
+		// Rute Kategori
+		apiRoutes.POST("/categories", handler.CreateCategory)
+		apiRoutes.GET("/categories", handler.GetCategories)
+		apiRoutes.PUT("/categories/:id", handler.UpdateCategory)      
+		apiRoutes.DELETE("/categories/:id", handler.DeleteCategory)
+
+		// Rute Sub-Kategori
+		apiRoutes.POST("/categories/:id/subcategories", handler.CreateSubCategory)
+		apiRoutes.GET("/categories/:id/subcategories", handler.GetSubCategoriesForCategory)
+		apiRoutes.PUT("/subcategories/:id", handler.UpdateSubCategory)    
+		apiRoutes.DELETE("/subcategories/:id", handler.DeleteSubCategory)
+		apiRoutes.GET("/categories/:id/allsubcategories", handler.GetAllSubCategoriesForCategory)
 	}
 	router.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
