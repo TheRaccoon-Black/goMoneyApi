@@ -2,7 +2,7 @@ package model
 
 import (
 	"time"
-	"gorm.io/gorm"
+	// "gorm.io/gorm"
 )
 
 

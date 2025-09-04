@@ -5,7 +5,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/TheRaccoon-Black/goMoneyApi/internal/database" // Ganti dengan path modul Anda
-	"github.com/TheRaccoon-Black/goMoneyApi/internal/model"    // Ganti dengan path modul Anda
+	"github.com/TheRaccoon-Black/goMoneyApi/internal/model"    
+	"github.com/TheRaccoon-Black/goMoneyApi/internal/handler"    
+	"github.com/TheRaccoon-Black/goMoneyApi/internal/middleware"    
 )
 
 func main() {
@@ -23,7 +25,19 @@ func main() {
 	// Inisialisasi Gin Router
 	router := gin.Default()
 
-	// Rute percobaan
+
+	authRoutes := router.Group("/auth")
+	{
+		authRoutes.POST("/register", handler.Register)
+		authRoutes.POST("/login", handler.Login)
+	}
+
+
+	apiRoutes := router.Group("/api")
+	apiRoutes.Use(middleware.AuthMiddleware()) 
+	{
+		apiRoutes.GET("/profile", handler.GetCurrentUserProfile)
+	}
 	router.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "pong",
