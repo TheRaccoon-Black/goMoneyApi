@@ -56,6 +56,13 @@ func main() {
 		apiRoutes.PUT("/subcategories/:id", handler.UpdateSubCategory)    
 		apiRoutes.DELETE("/subcategories/:id", handler.DeleteSubCategory)
 		apiRoutes.GET("/categories/:id/allsubcategories", handler.GetAllSubCategoriesForCategory)
+
+		// Rute Transaksi
+		apiRoutes.POST("/transactions", handler.CreateTransaction)
+        apiRoutes.GET("/transactions", handler.GetTransactions)
+        apiRoutes.GET("/transactions/:id", handler.GetTransactionByID)
+        apiRoutes.DELETE("/transactions/:id", handler.DeleteTransaction)
+        apiRoutes.PUT("/transactions/:id", handler.UpdateTransaction)
 	}
 	router.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
