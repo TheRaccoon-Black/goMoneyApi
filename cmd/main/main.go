@@ -28,7 +28,11 @@ func main() {
 
 
 	// Konfigurasi CORS
-	router.Use(cors.Default())
+	config := cors.DefaultConfig()
+	config.AllowOrigins = []string{"http://localhost:3000", "http://10.74.197.27:3000"} // <-- Tambahkan alamat IP frontend Anda
+	config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
+	config.AllowHeaders = []string{"Origin", "Content-Type", "Authorization"}
+	router.Use(cors.New(config))
 
 	authRoutes := router.Group("/auth")
 	{
