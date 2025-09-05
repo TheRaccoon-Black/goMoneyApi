@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/TheRaccoon-Black/goMoneyApi/internal/database" // Ganti dengan path modul Anda
 	"github.com/TheRaccoon-Black/goMoneyApi/internal/model"    
@@ -25,6 +26,9 @@ func main() {
 	// Inisialisasi Gin Router
 	router := gin.Default()
 
+
+	// Konfigurasi CORS
+	router.Use(cors.Default())
 
 	authRoutes := router.Group("/auth")
 	{
