@@ -48,17 +48,20 @@ func GetCategories(c *gin.Context) {
 	currentUser := c.MustGet("currentUser").(model.User)
 	categoryType := c.Query("type")
 	
-    // <-- PERUBAHAN: Tambahkan .Preload("User")
-	query := database.DB.Preload("User").Where("user_id = ?", currentUser.ID)
+	// <-- PERUBAHAN UTAMA: Tambahkan .Preload("SubCategories")
+	// Ini akan mengambil semua sub-kategori yang terkait dengan setiap kategori.
+	query := database.DB.Preload("SubCategories").Where("user_id = ?", currentUser.ID)
 	
 	if categoryType != "" {
 		query = query.Where("type = ?", categoryType)
 	}
+
 	var categories []model.Category
 	if err := query.Find(&categories).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve categories"})
 		return
 	}
+
 	c.JSON(http.StatusOK, categories)
 }
 

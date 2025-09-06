@@ -31,6 +31,7 @@ type Category struct {
 	User      User      `gorm:"foreignKey:UserID"`
 	Name      string    `gorm:"size:255;not null"`
 	Type      string    `gorm:"size:50;not null"` 
+	SubCategories []SubCategory `gorm:"foreignKey:CategoryID"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
@@ -76,4 +77,17 @@ type Transaction struct {
 	DestinationAccountID *uint // <-- KOLOM BARU DITAMBAHKAN
 	CreatedAt            time.Time
 	UpdatedAt            time.Time
+}
+
+type Budget struct {
+	ID         uint     `gorm:"primaryKey"`
+	UserID     uint     `gorm:"not null;uniqueIndex:idx_user_category_month_year"`
+	User       User     `gorm:"foreignKey:UserID"`
+	CategoryID uint     `gorm:"not null;uniqueIndex:idx_user_category_month_year"`
+	Category   Category `gorm:"foreignKey:CategoryID"`
+	Amount     float64  `gorm:"type:decimal(15,2);not null"`
+	Month      int      `gorm:"not null;uniqueIndex:idx_user_category_month_year"`
+	Year       int      `gorm:"not null;uniqueIndex:idx_user_category_month_year"`
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
 }

@@ -18,7 +18,7 @@ func main() {
 	database.ConnectDatabase()
 
 	// Menjalankan Auto Migration
-	err := database.DB.AutoMigrate(&model.User{}, &model.Account{}, &model.Category{}, &model.SubCategory{}, &model.Transaction{})
+	err := database.DB.AutoMigrate(&model.User{}, &model.Account{}, &model.Category{}, &model.SubCategory{}, &model.Transaction{}, &model.Budget{})
 	if err != nil {
 		log.Fatal("Failed to migrate database:", err)
 	}
@@ -71,6 +71,10 @@ func main() {
         apiRoutes.GET("/transactions/:id", handler.GetTransactionByID)
         apiRoutes.DELETE("/transactions/:id", handler.DeleteTransaction)
         apiRoutes.PUT("/transactions/:id", handler.UpdateTransaction)
+
+		// Rute Budget
+    	apiRoutes.GET("/budgets", handler.GetBudgets)
+    	apiRoutes.POST("/budgets", handler.SetBudgets)
 	}
 	router.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{

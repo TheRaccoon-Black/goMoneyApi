@@ -81,33 +81,66 @@ func CreateTransaction(c *gin.Context) {
 		default:
 			return errors.New("invalid transaction type")
 		}
-		if err := tx.Create(&transaction).Error; err != nil {
-			return err
-		}
-		return nil
+		// 1. Buat record transaksi di database.
+// Setelah ini, variabel `transaction` akan otomatis terisi dengan ID dari database.
+if err := tx.Create(&transaction).Error; err != nil {
+    return err
+}
+
+// 2. Ambil KEMBALI record yang baru saja dibuat tersebut (menggunakan ID-nya)
+// beserta semua data relasinya untuk dikirim sebagai response.
+if err := tx.Preload("Account").Preload("SubCategory.Category").First(&transaction).Error; err != nil {
+    return err
+}
+
+// 3. Kirim response dari dalam transaction block
+c.JSON(http.StatusOK, transaction)
+
+return nil
 	})
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "Transaction created successfully"})
+	// c.JSON(http.StatusOK, gin.H{"message": "Transaction created successfully"})
 }
 
 func GetTransactions(c *gin.Context) {
 	currentUser := c.MustGet("currentUser").(model.User)
+
+	// --- LOGIKA BARU UNTUK FILTER TANGGAL ---
+	yearStr := c.Query("year")
+	monthStr := c.Query("month")
+
 	query := database.DB.Preload("Account").
 		Preload("SubCategory").
 		Preload("SubCategory.Category").
 		Where("user_id = ?", currentUser.ID).
 		Order("transaction_date desc")
+
+	// Jika parameter tahun dan bulan diberikan, terapkan filter
+	if yearStr != "" && monthStr != "" {
+		year, errYear := strconv.Atoi(yearStr)
+		month, errMonth := strconv.Atoi(monthStr)
+
+		if errYear == nil && errMonth == nil {
+			// Tentukan tanggal awal dan akhir dari bulan yang dipilih
+			startDate := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.UTC)
+			endDate := startDate.AddDate(0, 1, 0) // Tambah 1 bulan untuk mendapatkan awal bulan berikutnya
+
+			query = query.Where("transaction_date >= ? AND transaction_date < ?", startDate, endDate)
+		}
+	}
+	// ------------------------------------
+
 	var transactions []model.Transaction
 	if err := query.Find(&transactions).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve transactions"})
 		return
 	}
+
 	c.JSON(http.StatusOK, transactions)
 }
-
 func GetTransactionByID(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
