@@ -19,6 +19,40 @@ type BudgetInput struct {
 	Year       int     `json:"year" binding:"required"`
 }
 
+type BudgetSuggestion struct {
+	CategoryID      uint    `json:"category_id"`
+	SuggestedAmount float64 `json:"suggested_amount"`
+}
+
+func GetBudgetSuggestions(c *gin.Context) {
+	currentUser := c.MustGet("currentUser").(model.User)
+	year, _ := strconv.Atoi(c.Query("year"))
+	month, _ := strconv.Atoi(c.Query("month"))
+
+	if year == 0 || month == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Year and month are required"})
+		return
+	}
+
+	// Tentukan periode bulan sebelumnya untuk dianalisis
+	currentMonthStart := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.UTC)
+	prevMonthStart := currentMonthStart.AddDate(0, -1, 0)
+	// prevMonthEnd := currentMonthStart.Add(-time.Second)
+
+	var suggestions []BudgetSuggestion
+
+	// Query untuk menjumlahkan total pengeluaran per kategori dari bulan sebelumnya
+	database.DB.Model(&model.Transaction{}).
+		Select("sub_categories.category_id, SUM(transactions.amount) as suggested_amount").
+		Joins("join sub_categories on sub_categories.id = transactions.sub_category_id").
+		Where("transactions.user_id = ? AND transactions.type = 'expense'", currentUser.ID).
+		Where("transactions.transaction_date >= ? AND transactions.transaction_date < ?", prevMonthStart, currentMonthStart).
+		Group("sub_categories.category_id").
+		Scan(&suggestions)
+
+	c.JSON(http.StatusOK, suggestions)
+}
+
 // Handler untuk mendapatkan semua budget di bulan tertentu
 func GetBudgets(c *gin.Context) {
 	currentUser := c.MustGet("currentUser").(model.User)

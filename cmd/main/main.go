@@ -75,6 +75,7 @@ func main() {
 		// Rute Budget
     	apiRoutes.GET("/budgets", handler.GetBudgets)
     	apiRoutes.POST("/budgets", handler.SetBudgets)
+		apiRoutes.GET("/budgets/suggestions", handler.GetBudgetSuggestions)
 	}
 	router.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
